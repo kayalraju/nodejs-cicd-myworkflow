@@ -323,6 +323,523 @@ This project helps you learn
 - Production Project Structure
 
 ---
+# ⚙️ GitHub Actions Workflow Explained
+
+The workflow file is located at:
+
+```text
+.github/workflows/node-ci.yml
+```
+
+---
+
+## Complete Workflow
+
+```yaml
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+
+  test:
+    name: Node.js CI/CD Project
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Jest Tests
+        run: npm test
+
+      - name: Generate Coverage
+        run: npm run test:coverage
+
+  build:
+    name: Build Project
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Application
+        run: npm run build --if-present
+
+      - name: Build Successful
+        run: echo "Build completed successfully."
+
+  deploy:
+    name: Ready for Deployment
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Deployment Status
+        run: |
+          echo "===================================="
+          echo "CI/CD Pipeline Successful"
+          echo "Tests Passed"
+          echo "Build Successful"
+          echo "Ready for Deployment"
+          echo "Branch : ${{ github.ref_name }}"
+          echo "===================================="
+```
+
+---
+
+# Line-by-Line Explanation
+
+## Workflow Name
+
+```yaml
+name: Node.js CI/CD
+```
+
+Defines the workflow name shown in the **GitHub Actions** tab.
+
+---
+
+## Trigger Events
+
+```yaml
+on:
+```
+
+Specifies when the workflow starts.
+
+---
+
+### Push Event
+
+```yaml
+push:
+```
+
+Runs the workflow whenever code is pushed.
+
+Example:
+
+```bash
+git push origin main
+```
+
+---
+
+### Branch Filter
+
+```yaml
+branches:
+  - main
+  - development
+```
+
+Only pushes to the `main` and `development` branches trigger the workflow.
+
+| Branch | Workflow Runs |
+|----------|--------------|
+| main | ✅ Yes |
+| development | ✅ Yes |
+| feature/login | ❌ No |
+| feature/product | ❌ No |
+
+---
+
+### Pull Request
+
+```yaml
+pull_request:
+```
+
+Runs the workflow whenever a Pull Request is opened or updated.
+
+Example:
+
+```
+feature/login
+      │
+      ▼
+development
+```
+
+---
+
+## Jobs
+
+```yaml
+jobs:
+```
+
+A workflow is divided into multiple jobs.
+
+This workflow contains three jobs:
+
+```
+Test
+   ↓
+Build
+   ↓
+Deploy
+```
+
+---
+
+# Test Job
+
+```yaml
+test:
+```
+
+Creates the first job called **test**.
+
+---
+
+```yaml
+name: Node.js CI/CD Project
+```
+
+Display name shown in GitHub Actions.
+
+---
+
+```yaml
+runs-on: ubuntu-latest
+```
+
+Starts a fresh Ubuntu virtual machine provided by GitHub.
+
+---
+
+## Checkout Repository
+
+```yaml
+uses: actions/checkout@v4
+```
+
+Downloads your project source code from GitHub to the runner.
+
+Without this step, GitHub Actions has no code to test.
+
+---
+
+## Setup Node.js
+
+```yaml
+uses: actions/setup-node@v4
+```
+
+Installs Node.js on the virtual machine.
+
+---
+
+```yaml
+node-version: 22
+```
+
+Uses Node.js version **22**.
+
+---
+
+```yaml
+cache: npm
+```
+
+Caches downloaded npm packages to speed up future workflow runs.
+
+---
+
+## Install Dependencies
+
+```yaml
+run: npm install
+```
+
+Installs all packages listed in `package.json`.
+
+Example:
+
+- express
+- mongoose
+- jest
+- supertest
+- dotenv
+
+---
+
+## Run Tests
+
+```yaml
+run: npm test
+```
+
+Executes Jest test cases.
+
+If any test fails, the workflow stops and the next jobs do not run.
+
+---
+
+## Generate Coverage
+
+```yaml
+run: npm run test:coverage
+```
+
+Generates the test coverage report.
+
+The report is stored inside:
+
+```
+coverage/
+```
+
+---
+
+# Build Job
+
+```yaml
+build:
+```
+
+Starts the build stage.
+
+---
+
+```yaml
+needs: test
+```
+
+The build job runs **only if the test job succeeds**.
+
+Flow:
+
+```
+Tests Passed
+      │
+      ▼
+Build Starts
+```
+
+---
+
+## Build Application
+
+```yaml
+run: npm run build --if-present
+```
+
+Runs the build script if one exists in `package.json`.
+
+If there is no build script, this step is skipped without failing the workflow.
+
+---
+
+## Build Status
+
+```yaml
+run: echo "Build completed successfully."
+```
+
+Prints a confirmation message in the GitHub Actions log.
+
+---
+
+# Deploy Job
+
+```yaml
+deploy:
+```
+
+Starts the deployment stage.
+
+---
+
+```yaml
+needs: build
+```
+
+Deploy runs only if the build job succeeds.
+
+Flow:
+
+```
+Test
+   ↓
+Build
+   ↓
+Deploy
+```
+
+---
+
+## Deployment Status
+
+```yaml
+run: |
+```
+
+Runs multiple shell commands.
+
+---
+
+## Echo Commands
+
+```yaml
+echo "CI/CD Pipeline Successful"
+```
+
+Displays:
+
+```
+CI/CD Pipeline Successful
+```
+
+---
+
+```yaml
+echo "Tests Passed"
+```
+
+Displays:
+
+```
+Tests Passed
+```
+
+---
+
+```yaml
+echo "Build Successful"
+```
+
+Displays:
+
+```
+Build Successful
+```
+
+---
+
+```yaml
+echo "Ready for Deployment"
+```
+
+Displays:
+
+```
+Ready for Deployment
+```
+
+This project currently simulates deployment by printing status messages. In a real production project, this section would contain commands to deploy to a server or cloud platform.
+
+---
+
+```yaml
+echo "Branch : ${{ github.ref_name }}"
+```
+
+Displays the branch that triggered the workflow.
+
+Example:
+
+```
+Branch : main
+```
+
+or
+
+```
+Branch : development
+```
+
+---
+
+# Complete CI/CD Flow
+
+```text
+Developer
+    │
+    ▼
+Git Push
+    │
+    ▼
+GitHub Repository
+    │
+    ▼
+GitHub Actions Trigger
+    │
+    ▼
+Checkout Repository
+    │
+    ▼
+Setup Node.js
+    │
+    ▼
+Install Dependencies
+    │
+    ▼
+Run Jest Tests
+    │
+    ▼
+Generate Coverage
+    │
+    ▼
+Build Application
+    │
+    ▼
+Ready for Deployment
+    │
+    ▼
+CI/CD Pipeline Completed Successfully
+```
+
+---
+
+# Future Improvements
+
+This workflow can later be extended to include:
+
+- Docker Image Build
+- Docker Hub Push
+- AWS EC2 Deployment
+- Azure App Service Deployment
+- Render Deployment
+- Railway Deployment
+- GitHub Secrets
+- SonarQube Code Analysis
+- CodeQL Security Scan
+- Slack or Email Notifications
 
 # 👨‍💻 Author
 
