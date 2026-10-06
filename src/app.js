@@ -16,7 +16,9 @@ app.use(helmet());
 const productRoutes = require("./routes/product.routes");
  app.use("/api", productRoutes);
 
-
+app.get('/aboutpage', (req, res) => {
+  res.send('This is the about page');
+});
 
 
 module.exports = app;
