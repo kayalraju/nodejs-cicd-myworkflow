@@ -20,5 +20,8 @@ app.get('/aboutpage', (req, res) => {
   res.send('This is the about page');
 });
 
+app.get('/contactpage', (req, res) => {
+  res.send('This is the contact page');
+});
 
 module.exports = app;
