@@ -48,6 +48,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    deactive: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
