@@ -16,6 +16,10 @@ Route.get("/product/:id", productController.findOne);
 Route.put("/product/:id",Validation.validate(SchemaValidator.CreatesProductchema), productController.update);
 Route.delete("/product/:id", productController.delete);
 
+Route.get('/testing', (req, res) => {
+        res.send('This is the testing page');
+    });
+
 
 
 
